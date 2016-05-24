@@ -1,3 +1,5 @@
 .terraform
 *.retry
 *.tfstate
+*.tfstate.backup
+.travis.yml
