@@ -1,0 +1,23 @@
+---
+- hosts: all
+  gather_facts: true
+  become: true
+
+  pre_tasks:
+    - name: Gather ec2 facts
+      action: ec2_facts
+    - name: Gather ec2 instance tags
+      ec2_tag:
+        resource: "{{ ansible_ec2_instance_id }}"
+        state: list
+        region: "{{ ansible_ec2_placement_region }}"
+      register: instance_tags
+    - name: Group by role tag
+      group_by: key={{ instance_tags.tags.env }}
+
+  roles:
+    #- common
+    - { role: geerlingguy.elasticsearch, when: instance_tags.tags.role == 'elasticsearch'}
+    - { role: geerlingguy.kibana, when: instance_tags.tags.role == 'kibana' }
+    - { role: geerlingguy.logstash, when: instance_tags.tags.role == 'logstash' }
+
